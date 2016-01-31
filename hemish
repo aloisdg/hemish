@@ -7,18 +7,24 @@ function getCoordinates {
 
 function getHemisphere {
 	local firstChar=$(echo "${1}" | cut -c 1-1)
-	
-	if [ $firstChar == "-" ]; then
-		echo false
-	else
-		echo true	
-	fi
+    local isNorth=[[ $firstChar != "-" ]] && isNorth=1 || isNorth=0
+    echo "${isNorth}"
+}
+
+# todo: improve this...
+function isCoordinates {
+    readonly floatRegex="-?[0-9]*\.?[0-9]+ -?[0-9]*\.?[0-9]+"
+
+    local argumentLength=$((${#1} + 1))
+    local regexLength=$(echo "${1}" | grep -Po -- "${floatRegex}" | wc -c)
+    local isValid=$((${regexLength} == ${argumentLength}))
+    echo "${isValid}"
 }
 
 v=false
 c=""
 
-usage() { echo "Usage: $0 [-c <string>]" 1>&2; exit 1; }
+usage { echo "Usage: $0 [-c \"float float\"]" 1>&2; exit 1; }
 
 while getopts ":c:v" o; do
     case "${o}" in
@@ -37,15 +43,9 @@ shift $((OPTIND-1))
 
 if [ -z "${c}" ]; then
 	c=$(getCoordinates)
+elif [ $(isCoordinates "${c}") = 0 ]; then
+   usage
 fi
 
-# use regex to match "float float" example: -73.31 42.31
-# -?[0-9]*\.?[0-9]+ -?[0-9]*\.?[0-9]+
-
-isNorth=$(getHemisphere "${c}")
-
-if [ $isNorth = true ] ; then
-    echo "north"
-else
-    echo "south"
-fi
+[[ $(getHemisphere "${c}") = 1 ]] && output="north" || output="south"
+echo $output
