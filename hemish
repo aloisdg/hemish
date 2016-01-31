@@ -1,0 +1,62 @@
+#!/bin/bash
+
+function getCoordinates {
+	local coordinates=$(curl -s http://whatismycountry.com/ | sed -n 's/.*Coordinates \(.*\)<.*/\1/p')
+	echo "${coordinates}"
+}
+
+function getHemisphere {
+	local firstChar=$(echo "${1}" | cut -c 1-1)
+	
+	if [ $firstChar == "-" ]; then
+		echo false
+	else
+		echo true	
+	fi
+}
+
+# hemisphere=$(getHemisphere)
+
+# echo $hemisphere
+
+v=false
+c=""
+
+usage() { echo "Usage: $0 [-s <45|90>] [-c <string>]" 1>&2; exit 1; }
+
+while getopts ":s:c:v" o; do
+    case "${o}" in
+        s)
+            s=${OPTARG}
+            ((s == 45 || s == 90)) || usage
+            ;;
+        c)
+            c=${OPTARG}
+            ;;
+		v)
+			v=true
+			;;
+        *)
+            usage
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [ -z "${s}" ]; then
+    usage
+fi
+
+if [ -z "${c}" ]; then
+	c=$(getCoordinates)
+fi
+
+# use regex to match "float float" example: -73.31 42.31
+# -?[0-9]*\.?[0-9]+ -?[0-9]*\.?[0-9]+
+
+isNorth=$(getHemisphere "${c}")
+
+echo "s = ${s}"
+echo "c = ${c}"
+echo "north = ${isNorth}"
+echo "v = ${v}"
