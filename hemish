@@ -15,21 +15,13 @@ function getHemisphere {
 	fi
 }
 
-# hemisphere=$(getHemisphere)
-
-# echo $hemisphere
-
 v=false
 c=""
 
-usage() { echo "Usage: $0 [-s <45|90>] [-c <string>]" 1>&2; exit 1; }
+usage() { echo "Usage: $0 [-c <string>]" 1>&2; exit 1; }
 
-while getopts ":s:c:v" o; do
+while getopts ":c:v" o; do
     case "${o}" in
-        s)
-            s=${OPTARG}
-            ((s == 45 || s == 90)) || usage
-            ;;
         c)
             c=${OPTARG}
             ;;
@@ -43,10 +35,6 @@ while getopts ":s:c:v" o; do
 done
 shift $((OPTIND-1))
 
-if [ -z "${s}" ]; then
-    usage
-fi
-
 if [ -z "${c}" ]; then
 	c=$(getCoordinates)
 fi
@@ -56,7 +44,8 @@ fi
 
 isNorth=$(getHemisphere "${c}")
 
-echo "s = ${s}"
-echo "c = ${c}"
-echo "north = ${isNorth}"
-echo "v = ${v}"
+if [ $isNorth = true ] ; then
+    echo "north"
+else
+    echo "south"
+fi
