@@ -7,18 +7,18 @@ function getCoordinates {
 
 function getHemisphere {
 	local firstChar=$(echo "${1}" | cut -c 1-1)
-    local isNorth=[[ $firstChar != "-" ]] && isNorth=1 || isNorth=0
-    echo "${isNorth}"
+	local isNorth=[[ $firstChar != "-" ]] && isNorth=1 || isNorth=0
+	echo "${isNorth}"
 }
 
 # todo: improve this...
 function isCoordinates {
-    readonly floatRegex="-?[0-9]*\.?[0-9]+ -?[0-9]*\.?[0-9]+"
+	readonly floatRegex="-?[0-9]*\.?[0-9]+ -?[0-9]*\.?[0-9]+"
 
-    local argumentLength=$((${#1} + 1))
-    local regexLength=$(echo "${1}" | grep -Po -- "${floatRegex}" | wc -c)
-    local isValid=$((${regexLength} == ${argumentLength}))
-    echo "${isValid}"
+	local argumentLength=$((${#1} + 1))
+	local regexLength=$(echo "${1}" | grep -Po -- "${floatRegex}" | wc -c)
+	local isValid=$((${regexLength} == ${argumentLength}))
+	echo "${isValid}"
 }
 
 v=false
@@ -27,24 +27,24 @@ c=""
 usage { echo "Usage: $0 [-c \"float float\"]" 1>&2; exit 1; }
 
 while getopts ":c:v" o; do
-    case "${o}" in
-        c)
-            c=${OPTARG}
-            ;;
+	case "${o}" in
+	c)
+			c=${OPTARG}
+			;;
 		v)
 			v=true
 			;;
-        *)
-            usage
-            ;;
-    esac
+		*)
+			usage
+			;;
+	esac
 done
 shift $((OPTIND-1))
 
 if [ -z "${c}" ]; then
 	c=$(getCoordinates)
 elif [ $(isCoordinates "${c}") = 0 ]; then
-   usage
+	usage
 fi
 
 [[ $(getHemisphere "${c}") = 1 ]] && output="north" || output="south"
